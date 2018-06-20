@@ -30,5 +30,5 @@ $plugin->version = 2018061900;
 $plugin->requires = 2017111300;
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->dependencies = [
-    'mod_hvp' => 2017060600,
+    'mod_hvp' => 2018053100,
 ];
