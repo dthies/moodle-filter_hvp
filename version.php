@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'filter_hvp';
 $plugin->release = '0.1.0';
-$plugin->version = 2018061900;
+$plugin->version = 2018062200;
 $plugin->requires = 2017111300;
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->dependencies = [
