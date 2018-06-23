@@ -82,20 +82,28 @@ class filter_hvp extends moodle_text_filter {
                 // Sort activities by the length of the activity name in reverse order.
                 core_collator::asort_objects_by_property($sortedactivities, 'namelen', core_collator::SORT_NUMERIC);
 
+                // If filter applies to headers, embed in div rather that iframe.
+                $embedtype = array_key_exists('hvp', filter_get_string_filters()) ? 'div' : 'iframe';
                 foreach ($sortedactivities as $cm) {
                     $title = s(trim(strip_tags($cm->name)));
                     $currentname = trim($cm->name);
                     $entitisedname  = s($currentname);
-                    // Avoid empty or unlinkable activity names.
+                    // Avoid empty activity names.
                     if (!empty($title) && get_coursemodule_from_id('hvp', $cm->id)) {
-                        $id = get_coursemodule_from_id('hvp', $cm->id)->instance;
-                        $href_tag_begin = html_writer::start_tag('iframe', array('class' => 'h5p-content',
-                            'width' => '400',
-                            'height' => '400',
-                            'frameborder' => '0',
-                            'allowfullscreen' => 'allowfullscreen',
-                            'src' => new moodle_url('/mod/hvp/embed.php', array('id' => $cm->id))));
-                        self::$activitylist[$cm->id] = new filterobject($currentname, $href_tag_begin, '</iframe>', false, true, ' ');
+                        if ($embedtype == 'div') {
+                            $id = get_coursemodule_from_id('hvp', $cm->id)->instance;
+                            $href_tag_begin = html_writer::start_tag('div',
+                                    array('class' => 'h5p-content', 'data-content-id' => self::embed_hvp($cm->id)));
+                            self::$activitylist[$cm->id] = new filterobject($currentname, $href_tag_begin, '</div>', false, true, ' ');
+                        } else {
+                            $href_tag_begin = html_writer::start_tag('iframe', array('class' => 'h5p-content',
+                                'width' => '400',
+                                'height' => '400',
+                                'frameborder' => '0',
+                                'allowfullscreen' => 'allowfullscreen',
+                                'src' => new moodle_url('/mod/hvp/embed.php', array('id' => $cm->id))));
+                            self::$activitylist[$cm->id] = new filterobject($currentname, $href_tag_begin, '</iframe>', false, true, ' ');
+                        }
                         if ($currentname != $entitisedname) {
                             // If name has some entity (&amp; &quot; &lt; &gt;) add that filter too. MDL-17545.
                             self::$activitylist[$cm->id.'-e'] = new filterobject($entitisedname, $href_tag_begin, '</iframe>', false, true);
@@ -121,5 +129,38 @@ class filter_hvp extends moodle_text_filter {
         } else {
             return $text;
         }
+    }
+ 
+    function embed_hvp($id) {
+        global $CFG, $DB, $PAGE, $OUTPUT;
+        require_once($CFG->dirroot . "/config.php");
+        require_once($CFG->dirroot . "/mod/hvp/locallib.php");
+
+        if (! $cm = get_coursemodule_from_id('hvp', $id)) {
+            print_error('invalidcoursemodule');
+        }
+        if (! $course = $DB->get_record('course', array('id' => $cm->course))) {
+            print_error('coursemisconf');
+        }
+
+        /*
+        // Load H5P Core.
+        $core = \mod_hvp\framework::instance();
+
+        // Load H5P Content.
+        $content = $core->loadContent($cm->instance);
+        if ($content === null) {
+            print_error('invalidhvp');
+        }
+         */
+        // Set up view assets.
+        $view    = new \mod_hvp\view_assets($cm, $course);
+        $content = $view->getcontent();
+        $view->validatecontent();
+
+        // Add H5P assets to page.
+        $view->addassetstopage();
+        $view->logviewed();
+        return $content['id'];
     }
 } 
