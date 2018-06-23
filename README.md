@@ -3,11 +3,11 @@
 This filter embeds H5P activities within other pages in a course like
 pages in books, lessons, or course page.
 
-To install, place the directory contents in *filter/hvp*, an visit the
-admin settings to complet the plugin install. Afterward go to Plugins ->
-Manage filters, and enable this filter. Change the *Apply to* setting
-to *Contents and headings* to have the filter embed the HP5 Content
-directly on the page rather than in a frame.
+To install, place the directory contents in *filter/hvp*, and visit the
+admin settings to complete the plugin install. Afterward go to *Plugins
+-> Manage filters*, and enable this filter or make it available. Change the
+*Apply to* setting to *Contents and headings* to have the filter embed
+the HP5 Content directly on the page rather than in a frame (experimental).
 
 To embed an H5P activity, first include the H5P file as an activity
 within the Moodle course. Give it a unique name and set the availablity
